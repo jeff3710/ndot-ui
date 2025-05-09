@@ -179,16 +179,17 @@
               password: formData.password
             })
           })
-
+          // 通过id获取用户信息
           if (res.code === ApiStatus.success && res.data) {
-            // 设置 token
-            userStore.setToken(res.data.accessToken)
-
-            // 获取用户信息
-            const userRes = await UserService.getUserInfo()
-            if (userRes.code === ApiStatus.success) {
-              userStore.setUserInfo(userRes.data)
+            const userRes2 = await UserService.getUserInfoById(res.data.user.id.toString())
+            if (userRes2.code === ApiStatus.success && userRes2.data) {
+              userStore.setUserInfo(userRes2.data)
             }
+            // 获取用户信息
+            // const userRes = await UserService.getUserInfo(formData.username)
+            // if (userRes.code === ApiStatus.success && userRes.data) {
+            //   userStore.setUserInfo(userRes.data)
+            // }
 
             // 设置登录状态
             userStore.setLoginStatus(true)
@@ -199,7 +200,7 @@
             // 跳转首页
             router.push(HOME_PAGE)
           } else {
-            ElMessage.error(res.message)
+            ElMessage.error(res.msg)
           }
         } finally {
           await delay(1000)

@@ -3,6 +3,7 @@
     <div class="top-wrap" v-show="showSearchWrap">
       <slot name="top"> </slot>
       <div class="buttons">
+        <el-button type="primary" @click="add" v-ripple>添加</el-button>
         <el-button type="primary" @click="search" v-ripple>搜索</el-button>
         <el-button @click="reset" v-ripple>重置</el-button>
       </div>
@@ -13,6 +14,7 @@
       </div>
       <div class="right-wrap">
         <el-button-group>
+          <el-button :icon="Plus" @click="newDevice()" v-if="layout.indexOf('add') !== -1" />
           <el-button
             :icon="Search"
             @click="isShowSearchWrap()"
@@ -35,6 +37,7 @@
               <el-checkbox
                 v-for="(item, index) in colSelect"
                 :label="item"
+                :value="item"
                 :key="item"
                 @change="changeColumn($event, index)"
               />
@@ -51,9 +54,10 @@
 
 <script setup lang="ts">
   import { useCommon } from '@/composables/useCommon'
-  import { Search, RefreshRight, Operation } from '@element-plus/icons-vue'
+  import { router } from '@/router'
+  import { Plus, Search, RefreshRight, Operation } from '@element-plus/icons-vue'
 
-  const emit = defineEmits(['search', 'reset', 'changeColumn'])
+  const emit = defineEmits(['add', 'search', 'reset', 'changeColumn'])
 
   const props = defineProps({
     showTop: {
@@ -70,7 +74,7 @@
     },
     layout: {
       type: String,
-      default: 'search, refresh, column'
+      default: 'add, search, refresh, column'
     }
   })
 
@@ -86,6 +90,9 @@
   // 刷新页面
   const refresh = () => {
     useCommon().refresh()
+  }
+  const newDevice = () => {
+    router.push({ name: 'DeviceAdd' })
   }
 
   // 是否显示搜索区域
@@ -127,6 +134,9 @@
 
   const reset = () => {
     emit('reset')
+  }
+  const add = () => {
+    emit('add')
   }
 </script>
 

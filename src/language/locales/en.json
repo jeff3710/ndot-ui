@@ -294,8 +294,13 @@
     "dashboard": {
       "title": "Dashboard",
       "console": "Console",
-      "analysis": "Analysis",
-      "ecommerce": "Ecommerce"
+      "analysis": "Analysis"
+    },
+    "device": {
+      "title": "Device Management",
+      "device": "Device List",
+      "deviceDetail": "Device Detail",
+      "newDevice": "New Device"
     },
     "widgets": {
       "title": "Components",
@@ -315,6 +320,8 @@
       "elementUI": "Component Overview"
     },
     "template": {
+      "snmp": "SNMP Template",
+      "ssh": "SSH Template",
       "title": "Template Center",
       "chat": "Chat",
       "cards": "Cards",

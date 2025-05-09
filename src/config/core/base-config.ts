@@ -9,7 +9,7 @@ export const createBaseConfig = (): SystemConfig => ({
     name: 'Art Design Pro',
     login: {
       username: 'admin',
-      password: '123456'
+      password: 'Ndot@2025'
     }
   },
   // Element Plus 主题

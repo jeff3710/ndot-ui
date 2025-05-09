@@ -224,3 +224,50 @@ export function removeHtmlTags(str: string = ''): string {
 export function isIframe(url: string) {
   return url.includes('/outside/iframe')
 }
+
+// 表格模糊查找过滤
+export type TableRow = Record<string, string | number>
+
+export const filterTableData = <T extends Record<string, string | number>>(
+  tableData: T[],
+  searchQuery: string
+) => {
+  if (!searchQuery) {
+    return tableData
+  }
+  const query = searchQuery.trim()
+  const regex = new RegExp(query, 'i')
+
+  return tableData.filter((item) => {
+    return Object.values(item).some((value) => {
+      if (typeof value === 'string') {
+        return regex.test(value)
+      } else if (typeof value === 'number') {
+        return String(value).match(regex)
+      }
+      return false
+    })
+  })
+}
+
+// 工具函数：驼峰转蛇形
+export const camelToSnake = (obj: any): any => {
+  if (typeof obj !== 'object' || obj === null) return obj
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => camelToSnake(item))
+  }
+
+  const newObj: any = {}
+  for (const key in obj) {
+    // 使用 Object.prototype.hasOwnProperty.call()
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const snakeKey = key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)
+      newObj[snakeKey] = camelToSnake(obj[key])
+    }
+  }
+  return newObj
+}
+
+// 在发送请求前统一转换
+// const response = await axios.post('/api/snmptemplate', camelToSnake(formData));

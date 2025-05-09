@@ -37,7 +37,7 @@ axiosInstance.interceptors.request.use(
     if (accessToken) {
       request.headers.set({
         'Content-Type': 'application/json',
-        Authorization: accessToken
+        Authorization: `Bearer ${accessToken}`
       })
     }
 
@@ -83,6 +83,7 @@ async function request<T = any>(config: AxiosRequestConfig): Promise<T> {
     return res.data
   } catch (e) {
     if (axios.isAxiosError(e)) {
+      console.error('Axios error:', e)
       // 可以在这里处理 Axios 错误
     }
     return Promise.reject(e)

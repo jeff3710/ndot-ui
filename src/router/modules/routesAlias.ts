@@ -11,7 +11,6 @@ export enum RoutesAlias {
   Fail = '/result/Fail', // 失败
   Dashboard = '/dashboard/console', // 工作台
   Analysis = '/dashboard/analysis', // 分析页
-  Ecommerce = '/dashboard/ecommerce', // 电子商务
   IconList = '/widgets/IconList', // 图标列表
   IconSelector = '/widgets/IconSelector', // 图标选择器
   ImageCrop = '/widgets/ImageCrop', // 图片裁剪
@@ -25,6 +24,10 @@ export enum RoutesAlias {
   Drag = '/widgets/Drag', // 拖拽
   TextScroll = '/widgets/TextScroll', // 文字滚动
   Fireworks = '/widgets/Fireworks', // 礼花效果
+  Snmp = '/template/Snmp', // SNMP
+  SSH = '/template/SSH', // SSH
+  NewSSH = '/template/NewSSH', // 新增SSH
+  NewSnmp = '/template/NewSnmp', // 新增SNMP
   Chat = '/template/Chat', // 聊天
   Cards = '/template/Cards', // 卡片
   Banners = '/template/Banners', // 横幅
@@ -46,9 +49,11 @@ export enum RoutesAlias {
   NestedMenu21 = '/menu/nested/menu2/Menu2-1', // 嵌套菜单2-1
   NestedMenu31 = '/menu/nested/menu3/Menu3-1', // 嵌套菜单3-1
   NestedMenu321 = '/menu/nested/menu3/menu3-2/Menu3-2-1', // 嵌套菜单3-2-1
+  NewDevice = '/device/NewDevice', // 新增设备
   Setting = '/system/Setting', // 设置
   Api = '/system/Api', // API
   Log = '/system/Log', // 日志
   Server = '/safeguard/Server', // 服务器
-  ChangeLog = '/log/ChangeLog' // 更新日志
+  ChangeLog = '/log/ChangeLog', // 更新日志
+  DevicesList = '/device/Device' // 设备列表
 }

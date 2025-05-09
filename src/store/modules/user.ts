@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { LanguageEnum } from '@/enums/appEnum'
 import { router, setPageTitle } from '@/router'
-import { UserInfo } from '@/types/store'
+import { UserData } from '@/types/axios'
 import { useSettingStore } from './setting'
 import { useWorktabStore } from './worktab'
 import { getSysStorage } from '@/utils/storage'
@@ -14,7 +14,7 @@ export const useUserStore = defineStore('userStore', () => {
   const isLogin = ref(false)
   const isLock = ref(false)
   const lockPassword = ref('')
-  const info = ref<Partial<UserInfo>>({})
+  const info = ref<Partial<UserData>>({})
   const searchHistory = ref<MenuListType[]>([])
   const accessToken = ref('')
   const refreshToken = ref('')
@@ -65,7 +65,7 @@ export const useUserStore = defineStore('userStore', () => {
     })
   }
 
-  const setUserInfo = (newInfo: UserInfo) => {
+  const setUserInfo = (newInfo: UserData) => {
     info.value = newInfo
   }
 

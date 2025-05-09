@@ -11,13 +11,10 @@
         <el-form :model="searchForm" ref="searchFormRef" label-width="82px">
           <el-row :gutter="20">
             <ArtFormInput label="用户名" prop="name" v-model="searchForm.name" />
-            <ArtFormInput label="手机号" prop="phone" v-model="searchForm.phone" />
-            <ArtFormInput label="邮箱" prop="email" v-model="searchForm.email" />
             <ArtFormInput label="账号" prop="account" v-model="searchForm.account" />
           </el-row>
           <el-row :gutter="20">
             <ArtFormInput label="用户ID" prop="id" v-model="searchForm.id" />
-            <ArtFormSelect label="性别" prop="sex" v-model="searchForm.sex" :options="sexOptions" />
             <ArtFormSelect
               label="会员等级"
               prop="level"
@@ -31,7 +28,6 @@
         <el-button @click="showDialog('add')" v-ripple>添加用户</el-button>
       </template>
     </art-table-bar>
-
     <art-table :data="tableData" selection :currentPage="1" :pageSize="10" :total="50">
       <template #default>
         <el-table-column
@@ -42,30 +38,22 @@
           v-if="columns[0].show"
         >
           <div class="user" style="display: flex; align-items: center">
-            <img class="avatar" :src="scope.row.avatar" />
+            <!-- <img class="avatar" :src="scope.row.avatar" /> -->
             <div>
               <p class="user-name">{{ scope.row.username }}</p>
-              <p class="email">{{ scope.row.email }}</p>
             </div>
           </div>
         </el-table-column>
-        <el-table-column label="手机号" prop="mobile" v-if="columns[1].show" />
-        <el-table-column label="性别" prop="sex" #default="scope" sortable v-if="columns[2].show">
-          {{ scope.row.sex === 1 ? '男' : '女' }}
-        </el-table-column>
-        <el-table-column label="部门" prop="dep" v-if="columns[3].show" />
+        <el-table-column label="角色" prop="role" v-if="columns[3].show" />
         <el-table-column
           label="状态"
           prop="status"
           :filters="[
-            { text: '在线', value: '1' },
-            { text: '离线', value: '2' },
-            { text: '异常', value: '3' },
-            { text: '注销', value: '4' }
+            { text: '启用', value: '1' },
+            { text: '禁用', value: '2' }
           ]"
           :filter-method="filterTag"
           filter-placement="bottom-end"
-          v-if="columns[4].show"
         >
           <template #default="scope">
             <el-tag :type="getTagType(scope.row.status)">
@@ -73,7 +61,7 @@
             >
           </template>
         </el-table-column>
-        <el-table-column label="创建日期" prop="create_time" sortable v-if="columns[5].show" />
+        <el-table-column label="创建日期" prop="create_time" sortable v-if="columns[3].show" />
         <el-table-column fixed="right" label="操作" width="150px">
           <template #default="scope">
             <ArtButtonTable type="edit" @click="showDialog('edit', scope.row)" />
@@ -92,20 +80,17 @@
         <el-form-item label="用户名" prop="username">
           <el-input v-model="formData.username" />
         </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="formData.phone" />
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="formData.password" />
         </el-form-item>
-        <el-form-item label="性别" prop="sex">
-          <el-select v-model="formData.sex">
-            <el-option label="男" value="男" />
-            <el-option label="女" value="女" />
-          </el-select>
+        <el-form-item label="确认密码" prop="repassword">
+          <el-input v-model="formData.repassword" />
         </el-form-item>
-        <el-form-item label="部门" prop="dep">
-          <el-select v-model="formData.dep">
-            <el-option label="董事会部" :value="1" />
-            <el-option label="市场部" :value="2" />
-            <el-option label="技术部" :value="3" />
+        <el-form-item label="角色" prop="role">
+          <el-select v-model="formData.role">
+            <el-option label="超级管理员" :value="1" />
+            <el-option label="系统管理员" :value="2" />
+            <el-option label="审计管理员" :value="3" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -130,21 +115,11 @@
 
   const formData = reactive({
     username: '',
-    phone: '',
-    sex: '',
-    dep: ''
+    password: '',
+    repassword: '',
+    role: ''
   })
 
-  const sexOptions = [
-    {
-      value: '男',
-      label: '男'
-    },
-    {
-      value: '女',
-      label: '女'
-    }
-  ]
   const levelOptions = [
     {
       value: '1',
@@ -158,9 +133,7 @@
 
   const columns = reactive([
     { name: '用户名', show: true },
-    { name: '手机号', show: true },
-    { name: '性别', show: true },
-    { name: '部门', show: true },
+    { name: '角色', show: true },
     { name: '状态', show: true },
     { name: '创建日期', show: true }
   ])
@@ -168,11 +141,9 @@
   const searchFormRef = ref<FormInstance>()
   const searchForm = reactive({
     name: '',
-    phone: '',
-    email: '',
     account: '',
     id: '',
-    sex: '',
+    role: '',
     level: ''
   })
 
@@ -189,14 +160,10 @@
 
     if (type === 'edit' && row) {
       formData.username = row.username
-      formData.phone = row.mobile
-      formData.sex = row.sex === 1 ? '男' : '女'
-      formData.dep = row.dep
+      formData.role = row.role
     } else {
       formData.username = ''
-      formData.phone = ''
-      formData.sex = '男'
-      formData.dep = ''
+      formData.role = ''
     }
   }
 
@@ -238,13 +205,9 @@
   const buildTagText = (status: string) => {
     let text = ''
     if (status === '1') {
-      text = '在线'
+      text = '启用'
     } else if (status === '2') {
-      text = '离线'
-    } else if (status === '3') {
-      text = '异常'
-    } else if (status === '4') {
-      text = '注销'
+      text = '禁用'
     }
     return text
   }
@@ -254,12 +217,15 @@
       { required: true, message: '请输入用户名', trigger: 'blur' },
       { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
     ],
-    phone: [
-      { required: true, message: '请输入手机号', trigger: 'blur' },
-      { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
+    password: [
+      { required: true, message: '请输入密码', trigger: 'blur' },
+      { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
     ],
-    sex: [{ required: true, message: '请选择性别', trigger: 'change' }],
-    dep: [{ required: true, message: '请选择部门', trigger: 'change' }]
+    repassword: [
+      { required: true, message: '请输入确认密码', trigger: 'blur' },
+      { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' }
+    ],
+    role: [{ required: true, message: '请选择角色', trigger: 'change' }]
   })
 
   const formRef = ref<FormInstance>()
@@ -270,6 +236,7 @@
     await formRef.value.validate((valid) => {
       if (valid) {
         ElMessage.success(dialogType.value === 'add' ? '添加成功' : '更新成功')
+        console.log('formData', formData)
         dialogVisible.value = false
       }
     })

@@ -44,16 +44,39 @@ export const asyncRoutes: MenuListType[] = [
           title: 'menus.dashboard.analysis',
           keepAlive: true
         }
+      }
+    ]
+  },
+  {
+    id: 13,
+    path: '/device',
+    name: 'Device',
+    component: RoutesAlias.Home,
+    meta: {
+      title: 'menus.device.title',
+      icon: '&#xe6af;',
+      keepAlive: false
+    },
+    children: [
+      {
+        id: 1301,
+        path: 'device',
+        name: 'DeviceList',
+        component: RoutesAlias.DevicesList,
+        meta: {
+          title: 'menus.device.device',
+          keepAlive: true
+        }
       },
       {
-        id: 103,
-        path: 'ecommerce',
-        name: 'Ecommerce',
-        component: RoutesAlias.Ecommerce,
+        id: 1302,
+        path: 'newdevice',
+        name: 'NewDevice',
+        component: RoutesAlias.NewDevice,
         meta: {
-          title: 'menus.dashboard.ecommerce',
-          keepAlive: true,
-          showTextBadge: 'new'
+          title: 'menus.device.newDevice',
+          isHide: true,
+          keepAlive: true
         }
       }
     ]
@@ -199,19 +222,6 @@ export const asyncRoutes: MenuListType[] = [
           keepAlive: true,
           showTextBadge: 'Hot'
         }
-      },
-      {
-        id: 516,
-        path: '/outside/iframe/elementui',
-        name: 'ElementUI',
-        component: '',
-        meta: {
-          title: 'menus.widgets.elementUI',
-          keepAlive: false,
-          link: 'https://element-plus.org/zh-CN/component/overview.html',
-          isIframe: true,
-          showBadge: true
-        }
       }
     ]
   },
@@ -226,6 +236,48 @@ export const asyncRoutes: MenuListType[] = [
       keepAlive: false
     },
     children: [
+      {
+        id: 12666,
+        path: 'snmp',
+        name: 'SNMP',
+        component: RoutesAlias.Snmp,
+        meta: {
+          title: 'menus.template.snmp',
+          keepAlive: false
+        }
+      },
+      {
+        id: 12667,
+        path: 'ssh',
+        name: 'SSH',
+        component: RoutesAlias.SSH,
+        meta: {
+          title: 'menus.template.ssh',
+          keepAlive: false
+        }
+      },
+      {
+        id: 12668,
+        path: 'newsnmp',
+        name: 'NewSNMP',
+        component: RoutesAlias.NewSnmp,
+        meta: {
+          title: 'menus.template.newsnmp',
+          isHide: true,
+          keepAlive: false
+        }
+      },
+      {
+        id: 12669,
+        path: 'newssh',
+        name: 'NewSSH',
+        component: RoutesAlias.NewSSH,
+        meta: {
+          title: 'menus.template.newssh',
+          isHide: true,
+          keepAlive: false
+        }
+      },
       {
         id: 12602,
         path: 'cards',
@@ -301,80 +353,6 @@ export const asyncRoutes: MenuListType[] = [
     ]
   },
   {
-    id: 4,
-    path: '/article',
-    name: 'Article',
-    component: RoutesAlias.Home,
-    meta: {
-      title: 'menus.article.title',
-      icon: '&#xe7ae;',
-      keepAlive: true
-    },
-    children: [
-      {
-        id: 202,
-        path: 'article-list',
-        name: 'ArticleList',
-        component: RoutesAlias.ArticleList,
-        meta: {
-          title: 'menus.article.articleList',
-          keepAlive: true,
-          authList: [
-            {
-              id: 2021,
-              title: '新增',
-              auth_mark: 'add'
-            },
-            {
-              id: 2022,
-              title: '编辑',
-              auth_mark: 'edit'
-            }
-          ]
-        }
-      },
-
-      {
-        id: 204,
-        path: 'detail',
-        name: 'ArticleDetail',
-        component: RoutesAlias.ArticleDetail,
-        meta: {
-          title: 'menus.article.articleDetail',
-          isHide: true,
-          keepAlive: true
-        }
-      },
-      {
-        id: 205,
-        path: 'comment',
-        name: 'Comment',
-        component: RoutesAlias.Comment,
-        meta: {
-          title: 'menus.article.comment',
-          keepAlive: true
-        }
-      },
-      {
-        id: 201,
-        path: 'article-publish',
-        name: 'ArticlePublish',
-        component: RoutesAlias.ArticlePublish,
-        meta: {
-          title: 'menus.article.articlePublish',
-          keepAlive: true,
-          authList: [
-            {
-              id: 2010,
-              title: '发布',
-              auth_mark: 'article/article-publish/add'
-            }
-          ]
-        }
-      }
-    ]
-  },
-  {
     id: 2,
     name: 'User',
     path: '/user',
@@ -393,16 +371,6 @@ export const asyncRoutes: MenuListType[] = [
         meta: {
           title: 'menus.user.account',
           keepAlive: true
-        }
-      },
-      {
-        id: 302,
-        path: 'department',
-        name: 'Department',
-        component: RoutesAlias.Department,
-        meta: {
-          title: 'menus.user.department',
-          keepAlive: false
         }
       },
       {
@@ -737,6 +705,7 @@ export const asyncRoutes: MenuListType[] = [
       }
     ]
   },
+
   {
     id: 12,
     name: '',
