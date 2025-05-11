@@ -2,6 +2,7 @@ import axios, { InternalAxiosRequestConfig, AxiosRequestConfig, AxiosResponse } 
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/modules/user'
 import EmojiText from '../emojo'
+import { camelToSnake } from '../utils'
 
 const axiosInstance = axios.create({
   timeout: 15000, // 请求超时时间(毫秒)
@@ -31,13 +32,14 @@ const axiosInstance = axios.create({
 // 请求拦截器
 axiosInstance.interceptors.request.use(
   (request: InternalAxiosRequestConfig) => {
-    const { accessToken } = useUserStore()
+    const userStore = useUserStore()
+    const token = userStore.accessToken
 
     // 如果 token 存在，则设置请求头
-    if (accessToken) {
+    if (token) {
       request.headers.set({
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`
+        Authorization: `Bearer ${token}`
       })
     }
 
@@ -52,7 +54,37 @@ axiosInstance.interceptors.request.use(
 // 响应拦截器
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response,
-  (error) => {
+  async (error) => {
+    const userStore = useUserStore()
+    const originalRequest = error.config
+
+    // 如果响应状态是 401 错误，并且没有尝试过刷新 token
+    if (error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true // 标记为重试
+      try {
+        const refreshToken = userStore.refreshToken
+        if (!refreshToken) {
+          throw new Error('No refresh token available')
+        }
+        // 刷新 token 的请求
+        const { data } = await axiosInstance.post(
+          '/user/renew_access',
+          camelToSnake({ refreshToken })
+        )
+
+        // 更新 token
+        userStore.setToken(data.accessToken, data.refreshToken)
+
+        // 重新设置 Authorization 头并重试原始请求
+        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`
+        return axiosInstance(originalRequest)
+      } catch (refreshError) {
+        console.error('刷新 token 失败:', refreshError)
+        userStore.logOut() // 如果刷新失败，登出用户
+        return Promise.reject(refreshError)
+      }
+    }
+
     if (axios.isCancel(error)) {
       console.log('repeated request: ' + error.message)
     } else {

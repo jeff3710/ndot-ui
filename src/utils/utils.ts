@@ -268,6 +268,23 @@ export const camelToSnake = (obj: any): any => {
   }
   return newObj
 }
+// 工具函数：蛇形转驼峰
+export const snakeToCamel = (obj: any): any => {
+  if (typeof obj !== 'object' || obj === null) return obj
 
+  if (Array.isArray(obj)) {
+    return obj.map((item) => snakeToCamel(item))
+  }
+
+  const newObj: any = {}
+  for (const key in obj) {
+    // 使用 Object.prototype.hasOwnProperty.call()
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+      newObj[camelKey] = snakeToCamel(obj[key])
+    }
+  }
+  return newObj
+}
 // 在发送请求前统一转换
 // const response = await axios.post('/api/snmptemplate', camelToSnake(formData));

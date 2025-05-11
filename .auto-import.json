@@ -311,6 +311,7 @@
     "useId": true,
     "useModel": true,
     "useTemplateRef": true,
-    "ElForm": true
+    "ElForm": true,
+    "ElM": true
   }
 }

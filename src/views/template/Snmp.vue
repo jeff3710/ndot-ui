@@ -1,15 +1,16 @@
 <template>
   <div class="page-content">
-    <!-- 传入自定义按钮配置 -->
     <art-table-header :buttons="customButtons" @input="filterTable" />
-
     <art-table
+      :loading="loading"
       :data="filteredTableData"
-      selection
       @row-click="handleCellClick"
-      :currentPage="1"
-      :pageSize="10"
-      :total="total"
+      :currentPage="params.pageNo"
+      :pageSize="params.pageSize"
+      :total="snmpTemplateCount"
+      :margin-top="10"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
     >
       <template #default>
         <el-table-column
@@ -18,13 +19,11 @@
           :label="column.label"
           :prop="column.prop"
           sortable
-        >
-        </el-table-column>
-
+        />
         <el-table-column fixed="right" label="操作" width="150px">
-          <template #default="">
-            <ArtButtonTable type="edit" @click="editSnmp(rowKey)" />
-            <ArtButtonTable type="delete" @click="deleteSnmp(rowKey)" />
+          <template #default="{ row }">
+            <ArtButtonTable type="edit" @click="editSnmp(row)" />
+            <ArtButtonTable type="delete" @click="deleteSnmp(row)" />
           </template>
         </el-table-column>
       </template>
@@ -36,128 +35,20 @@
   import { filterTableData } from '@/utils/utils'
   import ArtTableHeader from '@/components/core/tables/ArtTableHeader.vue'
   import { rowKey } from 'element-plus/es/components/table-v2/src/common'
+  import { useDeviceStore } from '@/store/modules/device'
+  import { storeToRefs } from 'pinia'
   // import { useRouter } from 'vue-router'
 
-  // const dialogType = ref('add')
-  // const dialogVisible = ref(false)
   // const searchQuery = ref('')
+  const loading = ref(false)
+  const deviceStore = useDeviceStore()
+  const { snmpTemplateCount, snmpTemplateList } = storeToRefs(deviceStore)
+  const params = ref({
+    pageNo: 1,
+    pageSize: 10,
+    conditons: ''
+  })
   const router = useRouter()
-
-  const templateList = [
-    {
-      templateName: 'esight1',
-      parameterType: 'SNMPv3 Auth-Sha256 Priv-Aes256',
-      port: '22',
-      timeout: '10',
-      retryCount: '3',
-      pollingInterval: '1800',
-      deviceCount: '72'
-    },
-    {
-      templateName: 'esight2',
-      parameterType: 'SNMPv3 Auth-Sha256 Priv-Aes256',
-      port: '22',
-      timeout: '10',
-      retryCount: '3',
-      pollingInterval: '1800',
-      deviceCount: '72'
-    },
-    {
-      templateName: 'esight3',
-      parameterType: 'SNMPv3 Auth-Sha256 Priv-Aes256',
-      port: '22',
-      timeout: '10',
-      retryCount: '3',
-      pollingInterval: '1800',
-      deviceCount: '72'
-    },
-    {
-      templateName: 'esight4',
-      parameterType: 'SNMPv3 Auth-Sha256 Priv-Aes256',
-      port: '22',
-      timeout: '10',
-      retryCount: '3',
-      pollingInterval: '1800',
-      deviceCount: '72'
-    },
-    {
-      templateName: 'esight5',
-      parameterType: 'SNMPv3 Auth-Sha256 Priv-Aes256',
-      port: '22',
-      timeout: '10',
-      retryCount: '3',
-      pollingInterval: '1800',
-      deviceCount: '72'
-    },
-    {
-      templateName: 'esight6',
-      parameterType: 'SNMPv3 Auth-Sha256 Priv-Aes256',
-      port: '22',
-      timeout: '10',
-      retryCount: '3',
-      pollingInterval: '1800',
-      deviceCount: '72'
-    },
-    {
-      templateName: 'esight7',
-      parameterType: 'SNMPv3 Auth-Sha256 Priv-Aes256',
-      port: '22',
-      timeout: '10',
-      retryCount: '3',
-      pollingInterval: '1800',
-      deviceCount: '72'
-    },
-    {
-      templateName: 'esight8',
-      parameterType: 'SNMPv3 Auth-Sha256 Priv-Aes256',
-      port: '22',
-      timeout: '10',
-      retryCount: '3',
-      pollingInterval: '1800',
-      deviceCount: '72'
-    },
-    {
-      templateName: 'esight9',
-      parameterType: 'SNMPv3 Auth-Sha256 Priv-Aes256',
-      port: '22',
-      timeout: '10',
-      retryCount: '3',
-      pollingInterval: '1800',
-      deviceCount: '72'
-    },
-    {
-      templateName: 'esight10',
-      parameterType: 'SNMPv3 Auth-Sha256 Priv-Aes256',
-      port: '22',
-      timeout: '10',
-      retryCount: '3',
-      pollingInterval: '1800',
-      deviceCount: '72'
-    },
-    {
-      templateName: 'esight11',
-      parameterType: 'SNMPv3 Auth-Sha256 Priv-Aes256',
-      port: '22',
-      timeout: '10',
-      retryCount: '3',
-      pollingInterval: '1800',
-      deviceCount: '72'
-    },
-    {
-      templateName: 'esight12',
-      parameterType: 'SNMPv3 Auth-Sha256 Priv-Aes256',
-      port: '22',
-      timeout: '10',
-      retryCount: '3',
-      pollingInterval: '1800',
-      deviceCount: '72'
-    }
-  ]
-  const filteredTableData = ref(templateList)
-
-  const filterTable = (query: string) => {
-    filteredTableData.value = filterTableData(templateList, query)
-  }
 
   const columns = [
     {
@@ -196,9 +87,43 @@
       sortable: true
     }
   ]
+  // 转换数据格式
+  const templateList = computed(() => {
+    return snmpTemplateList.value.map((item) => ({
+      templateName: item.name,
+      parameterType: `${item.version} ${item.authProtocol} ${item.privProtocol}`,
+      port: item.port,
+      timeout: item.timeout,
+      retryCount: item.retries,
+      pollingInterval: item.pollInterval,
+      deviceCount: item.deviceCount
+    }))
+  })
+  console.log('snmpTemplateList', snmpTemplateList.value[0])
+  console.log('templateList', templateList.value)
 
-  const total = computed(() => templateList.length)
-  console.log(total.value)
+  const fetchData = async () => {
+    loading.value = true
+    try {
+      await deviceStore.getSnmpTemplateList(params.value)
+    } catch (error) {
+      console.log('获取SNMP模板列表失败', error)
+      ElMessage.error('获取SNMP模板列表失败')
+    } finally {
+      loading.value = false
+    }
+  }
+  const searchQuery = ref('')
+  const filteredTableData = computed(() => {
+    return filterTableData(templateList.value, searchQuery.value)
+  })
+  const filterTable = (query: string) => {
+    searchQuery.value = query
+  }
+  // const filteredTableData = ref(templateList)
+  // const filterTable = (query: string) => {
+  //   filteredTableData.value = filterTableData(templateList, query)
+  // }
 
   const handleCellClick = (row: any, column: any, event: Event) => {
     console.log('cell clicked', row, column, event)
@@ -210,10 +135,31 @@
   }
 
   const editSnmp = (row: any) => {
+    // router.push({ name: 'edit-snmp', params: { id: row.id } })
     console.log('编辑snmp模版', row, rowKey)
   }
   const deleteSnmp = (row: any) => {
-    console.log('删除snmp模版', row, rowKey)
+    ElMessageBox.confirm(`确定删除${row.templateName} 吗？`, '确认删除', { type: 'warning' }).then(
+      async () => {
+        try {
+          // 调用删除接口
+          fetchData()
+          ElMessage.success('删除成功')
+        } catch (error) {
+          console.log('删除snmp模版失败', error)
+          ElMessage.error('删除失败')
+        }
+      }
+    )
+  }
+
+  const handleSizeChange = (newSize: number) => {
+    params.value.pageSize = newSize
+    fetchData()
+  }
+  const handleCurrentChange = (newPage: number) => {
+    params.value.pageNo = newPage
+    fetchData()
   }
 
   const customButtons = ref([
@@ -242,6 +188,7 @@
       }
     }
   ])
+  onMounted(fetchData)
 </script>
 
 <style lang="scss" scoped>

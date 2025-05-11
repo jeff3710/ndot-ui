@@ -2,12 +2,15 @@
   <div class="page-content">
     <art-table-header :buttons="customButtons" @input="filterTable" />
     <art-table
+      :loading="loading"
       :data="filteredTableData"
-      selection
       @row-click="handleCellClick"
-      :currentPage="1"
-      :pageSize="10"
-      :total="total"
+      :currentPage="params.pageNo"
+      :pageSize="params.pageSize"
+      :total="sshTemplateCount"
+      :margin-top="10"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
     >
       <template #default>
         <el-table-column
@@ -16,13 +19,12 @@
           :label="column.label"
           :prop="column.prop"
           sortable
-        >
-        </el-table-column>
+        />
 
         <el-table-column fixed="right" label="操作" width="150px">
-          <template #default="">
-            <ArtButtonTable type="edit" @click="deleteUser" />
-            <ArtButtonTable type="delete" @click="deleteUser" />
+          <template #default="{ row }">
+            <ArtButtonTable type="edit" @click="deleteSsh(row)" />
+            <ArtButtonTable type="delete" @click="deleteSsh(row)" />
           </template>
         </el-table-column>
       </template>
@@ -33,26 +35,17 @@
 <script setup lang="ts">
   import { ElMessageBox, ElMessage } from 'element-plus'
   import { filterTableData } from '@/utils/utils'
-  import { useRouter } from 'vue-router'
+  import { useDeviceStore } from '@/store/modules/device'
 
-  // const dialogType = ref('add')
-  // const dialogVisible = ref(false)
+  const loading = ref(false)
+  const deviceStore = useDeviceStore()
+  const { sshTemplateCount, sshTemplateList } = storeToRefs(deviceStore)
+  const params = ref({
+    pageNo: 1,
+    pageSize: 10,
+    conditions: ''
+  })
   const router = useRouter()
-
-  const templateList = [
-    {
-      templateName: 'esight',
-      protocolType: 'STelnet',
-      port: '22',
-      timeout: '10',
-      deviceCount: '72'
-    }
-  ]
-  const filteredTableData = ref(templateList)
-
-  const filterTable = (query: string) => {
-    filteredTableData.value = filterTableData(templateList, query)
-  }
 
   const columns = [
     {
@@ -81,8 +74,34 @@
       sortable: true
     }
   ]
+  const templateList = computed(() => {
+    return sshTemplateList.value.map((item) => ({
+      templateName: item.templateName,
+      protocolType: item.protocolType,
+      port: item.port,
+      timeout: item.timeout,
+      deviceCount: item.deviceCount
+    }))
+  })
+  const fetchData = async () => {
+    loading.value = true
+    try {
+      await deviceStore.getSshTemplateList(params.value)
+    } catch (error) {
+      console.error('Error fetching SSH template list:', error)
+    } finally {
+      loading.value = false
+    }
+  }
+  const searchQuery = ref('')
 
-  const total = computed(() => templateList.length)
+  const filteredTableData = computed(() => {
+    return filterTableData(templateList.value, searchQuery.value)
+  })
+
+  const filterTable = (query: string) => {
+    searchQuery.value = query
+  }
 
   const handleCellClick = (row: any, column: any, event: Event) => {
     console.log('cell clicked', row, column, event)
@@ -93,8 +112,8 @@
     }
   }
 
-  const deleteUser = () => {
-    ElMessageBox.confirm('确定要注销该用户吗？', '注销用户', {
+  const deleteSsh = (row: any) => {
+    ElMessageBox.confirm(`确定要注销${row.templateName}吗？`, '注销用户', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'error'
@@ -102,12 +121,20 @@
       ElMessage.success('注销成功')
     })
   }
+  const handleSizeChange = (size: number) => {
+    params.value.pageSize = size
+    fetchData()
+  }
+  const handleCurrentChange = (page: number) => {
+    params.value.pageNo = page
+    fetchData()
+  }
 
   const customButtons = ref([
     {
       label: '新建',
       event: () => {
-        router.push('/template/newsnmp')
+        router.push('/template/newssh')
       }
     },
     {
@@ -129,6 +156,7 @@
       }
     }
   ])
+  onMounted(fetchData)
 </script>
 
 <style lang="scss" scoped>
